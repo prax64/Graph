@@ -1,0 +1,10 @@
+Graph
+b,c,d,e,f,g,h,
+directed
+7
+b,c,3
+b,e,3
+b,d,2
+d,b,1
+d,c,5
+e,d,-3
