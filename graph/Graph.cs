@@ -5,17 +5,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace Graph
 {
     public class Graph
     {
         LinkedList<Node> nodes = new LinkedList<Node>();
-        
+        private bool? directed = null ;
 
         public Graph() { }
 
-        public Graph(string where = "/home/jconda/RiderProjects/graph/input")
+        public Graph(string where)
         {
             string[] lines = File.ReadAllLines(where);
             try
@@ -32,28 +33,24 @@ namespace Graph
                         }
                         if (lines[++i] == "directed")
                         {
-                            while(true)
-                            {
-                                try
-                                {
-                                    var tmp = lines[++i].Split(',');
-                                    addDirectedVertex(tmp[0], tmp[1], int.Parse(tmp[2]));
-                                }
-                                catch (IndexOutOfRangeException)
-                                {
-                                    break;
-                                }
-                            }
-                            return;
+                            directed = true;
                         }
-                        if (lines[i] == "nondirected")
+                        else if (lines[i] == "nondirected")
                         {
-                            while(true)
+                            directed = false;
+                        }
+
+                        while (true)
+                        {
+                            try
                             {
                                 var tmp = lines[++i].Split(',');
-                                addNonDirectedVertex(tmp[0],tmp[1],int.Parse(tmp[2]));
+                                addDirectedVertex(tmp[0], tmp[1], int.Parse(tmp[2]));
                             }
-                            return;
+                            catch (IndexOutOfRangeException)
+                            {
+                                break;
+                            }
                         }
                     }
                 }
@@ -69,6 +66,7 @@ namespace Graph
         public Graph(Graph g)
         {
             nodes = g.nodes;
+            directed = g.directed;
         }
 
 
@@ -253,7 +251,7 @@ namespace Graph
     	    return null;
         }    
         
-        public void CreateGraphVizFile(string where, bool directed)
+        public void CreateGraphVizFile(string where)
         {
             StreamWriter writer = new StreamWriter(where, false);
             writer.WriteLine("Graph");
@@ -262,26 +260,54 @@ namespace Graph
                 writer.Write($"{a.label},");
             }
             writer.WriteLine();
-            if (directed)
-                writer.WriteLine("directed");
+            if (directed != null)
+            {
+                if (directed == true)
+                    writer.WriteLine("directed");
+                else
+                    writer.WriteLine("nondirected");
+            }
             else
-                writer.WriteLine("nondirected");
-            writer.WriteLine(nodes.Count);
-            // var count =  writer.WriteLine();
-            // int c = 0;
+            {
+                throw new Exception("Не определена напраленность графа!");
+            }
             foreach (Node a in nodes)
             {
                 foreach (Vertex b in a.neighbors)
                 {
                     writer.WriteLine(a.label + "," + b.node.label+","+b.weight);
-                        //c++;
                 }
             }
-            
             writer.Close();
         }
         
-        public IEnumerable print()
+        public string print()
+        {
+            StringBuilder res = new StringBuilder();
+            if (directed != null)
+            {
+                if (directed == true)
+                    res.Append("Graph = directed\n");
+                else
+                    res.Append("Graph = nondirected\n");
+            }
+            else
+            {
+                throw new Exception("Не определена напраленность графа!");
+            }
+            foreach (Node a in nodes)
+            {
+                res.Append($"{a.label}: [");
+                foreach (Vertex b in a.neighbors)
+                {
+                    res.Append($"{{{b.node.label}, {b.weight}}}, ");
+                }
+                res.Append("]\n");
+            }
+            return res.ToString();
+        }
+        
+        public IEnumerable getEdge()
         {
             foreach (Node a in nodes)
             {
@@ -290,6 +316,21 @@ namespace Graph
                     yield return $"{a.label},{b.node.label},{b.weight}";
                 }
             }
+        }
+
+        public override string ToString()
+        {
+            StringBuilder res = new StringBuilder();
+            foreach (Node a in nodes)
+            {
+                res.Append($"{a.label}: [");
+                foreach (Vertex b in a.neighbors)
+                {
+                    res.Append($"{{{b.node.label}, {b.weight}}}, ");
+                }
+                res.Append("]\n");
+            }
+            return res.ToString();
         }
     }
 }

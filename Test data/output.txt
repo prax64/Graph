@@ -1,7 +1,9 @@
 Graph
-b,c,d,e,f,g,h,
+a,b,c,d,e,f,g,h,
 directed
-7
+a,b,-1
+a,a,10
+a,c,4
 b,c,3
 b,e,3
 b,d,2

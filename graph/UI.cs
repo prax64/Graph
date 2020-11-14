@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
+using System.IO;
 using System.Runtime.CompilerServices;
 using Graph;
+
 
 namespace graph
 {
@@ -9,20 +13,19 @@ namespace graph
     {
         public static void mainMenu(Graph.Graph g)
         {
-           // Console.Clear();
+            Console.Clear();
             Console.WriteLine("Введите 1, для вывода списока смежности");
             
             
             Console.WriteLine("Введите 2, для удаления вершины");
-            
-            
-            Console.WriteLine("Введите 3, для удаления ребра");
 
+            Console.WriteLine("Введите 3, для удаления ребра");
             string digit = Console.ReadLine();
+            Console.Clear();
             switch (digit)
             {
                 case "1":
-                    printGraph(g);
+                    Console.WriteLine(g.print());
                     goToMainMenu(g);
                     break;
                 case "2":
@@ -43,7 +46,7 @@ namespace graph
                     break;
                 default:
                     Console.WriteLine("Не верный формат ввода. Введите цифру заново.");
-                    mainMenu(g);
+                    goToMainMenu(g);
                     break;
             }
         }
@@ -57,14 +60,12 @@ namespace graph
             else
                 goToMainMenu(g);
         }
-        public static void printGraph(Graph.Graph g)
+        public static void printEdge(Graph.Graph g)
         {
-            foreach (var a in g.print() )
+            foreach (var a in g.getEdge() )
             {
                 Console.WriteLine(a);
             }
-        } 
-        
-        
+        }
     }
 }

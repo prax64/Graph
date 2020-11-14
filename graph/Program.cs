@@ -14,15 +14,11 @@ namespace Graph_main
         {
 
             Graph.Graph g = new Graph.Graph("/home/jconda/RiderProjects/graph/Test data/input1");
-            g.delNode("a");
-            foreach (var a in g.print() )
-            {
-                Console.WriteLine(a);
-            }
+
             Graph.Graph g1 = new Graph.Graph(g);
             
             Console.WriteLine("\n");
-            g.CreateGraphVizFile("/home/jconda/RiderProjects/graph/Test data/output.txt", true);
+            g.CreateGraphVizFile("/home/jconda/RiderProjects/graph/Test data/output.txt");
             
             UI.mainMenu(g1); 
 
