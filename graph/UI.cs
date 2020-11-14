@@ -41,7 +41,7 @@ namespace graph
                     string v = Console.ReadLine();
                     Console.WriteLine("Введите вес данного ребра:");
                     int weigth = int.Parse(Console.ReadLine());
-                    g.delDirectedVertex(u,v,weigth);
+                    g.delEdge(u,v,weigth);
                     goToMainMenu(g);
                     break;
                 default:

@@ -13,7 +13,7 @@ namespace Graph
     {
         LinkedList<Node> nodes = new LinkedList<Node>();
         private bool? directed = null ;
-
+        
         public Graph() { }
 
         public Graph(string where)
@@ -122,7 +122,7 @@ namespace Graph
             x.neighbors.AddLast(new Vertex(y, weigth));
             y.neighbors.AddLast(new Vertex(x, weigth));
         }
-        public void delNonDirectedVertex(string u, string v,int weigth)
+        private void delNonDirectedVertex(string u, string v,int weigth)
         {
             Node x = null, y = null;
             foreach (Node a in nodes)
@@ -200,7 +200,7 @@ namespace Graph
             }
             x.neighbors.AddLast(new Vertex(y, weigth));
         }
-        public void delDirectedVertex(string u, string v, int weigth)
+        private void delDirectedVertex(string u, string v, int weigth)
         {
             Node x = null, y = null;
             foreach (Node a in nodes)
@@ -331,6 +331,26 @@ namespace Graph
                 res.Append("]\n");
             }
             return res.ToString();
+        }
+
+        private delegate void delVertex(string u, string v, int weigth);
+
+        public void delEdge(string u, string v, int weigth)
+        {
+            if (directed == true)
+            {
+                delVertex edge = new delVertex(delDirectedVertex);
+                edge(u, v, weigth);
+            }
+            else if (directed == false)
+            {
+                delVertex edge = new delVertex(delNonDirectedVertex);
+                edge(u, v, weigth);
+            }
+            else
+            {
+                throw new Exception("Не определена напраленность графа!");
+            }
         }
     }
 }
