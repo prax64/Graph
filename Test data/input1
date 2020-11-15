@@ -4,6 +4,7 @@ directed
 a,b,-1
 a,a,10
 a,c,4
+b,a,7
 b,c,3
 b,e,3
 b,d,2
