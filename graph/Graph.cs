@@ -13,6 +13,7 @@ namespace Graph
     {
         private LinkedList<Node> nodes = new LinkedList<Node>();
         private bool? directed = null ;
+        public bool? Directed => directed;
         private delegate void delVertex(string u, string v, int weigth);
 
         #region  Constructors
@@ -37,22 +38,33 @@ namespace Graph
                         if (lines[++i] == "directed")
                         {
                             directed = true;
+                            while (true)
+                            {
+                                try
+                                {
+                                    var tmp = lines[++i].Split(',');
+                                    AddDirectedVertex(tmp[0], tmp[1], int.Parse(tmp[2]));
+                                }
+                                catch (IndexOutOfRangeException)
+                                {
+                                    break;
+                                }
+                            }
                         }
                         else if (lines[i] == "nondirected")
                         {
                             directed = false;
-                        }
-
-                        while (true)
-                        {
-                            try
+                            while (true)
                             {
-                                var tmp = lines[++i].Split(',');
-                                AddDirectedVertex(tmp[0], tmp[1], int.Parse(tmp[2]));
-                            }
-                            catch (IndexOutOfRangeException)
-                            {
-                                break;
+                                try
+                                {
+                                    var tmp = lines[++i].Split(',');
+                                    AddNonDirectedVertex(tmp[0], tmp[1], int.Parse(tmp[2]));
+                                }
+                                catch (IndexOutOfRangeException)
+                                {
+                                    break;
+                                }
                             }
                         }
                     }
@@ -111,6 +123,13 @@ namespace Graph
             AddNonDirectedVertex(u, v, 0);
         }
 
+        private bool CheckingAdding(Node inNode, Node outNOde)
+        {
+            foreach (var ver in inNode.neighbors)
+                if (ver.node.label == outNOde.label)
+                    throw new Exception("Неверный формат данных! Ребро уже существует!");
+            return true;
+        }
         public void AddNonDirectedVertex(string u, string v,int weigth)
         {
             Node x = null, y = null;
@@ -125,8 +144,15 @@ namespace Graph
                     y = a;
                 }
             }
-            if (x == null || y == null)
+            
+            if (x == null || y == null || !CheckingAdding(x, y))
             {
+                return;
+            }
+            
+            if (u == v)
+            {
+                x.neighbors.AddLast(new Vertex(y, weigth));
                 return;
             }
             x.neighbors.AddLast(new Vertex(y, weigth));
@@ -189,7 +215,7 @@ namespace Graph
                     y = a;
                 }
             }
-            if (x == null || y == null)
+            if (x == null || y == null || !CheckingAdding(x, y))
             {
                 return;
             }
@@ -269,11 +295,11 @@ namespace Graph
         // returns a List neighbors of a node
         public LinkedList<string> GetLabelNeighborsNode(string u)
         {
-            LinkedList<string> reach = new LinkedList<string>();
+            LinkedList<string> labelNeighbors = new LinkedList<string>();
             var uNode = GetNodeByName(u);
             foreach (Vertex a in uNode.neighbors)
-                reach.AddLast(a.node.label);
-            return reach;
+                labelNeighbors.AddLast(a.node.label);
+            return labelNeighbors;
         }
         
         public LinkedList<string> GetLabelNodes() 
@@ -283,6 +309,7 @@ namespace Graph
                 labelNodes.AddLast(a.label);
             return labelNodes;
         }
+
         #region View
         public void CreateGraphVizFile(string where)
         {
@@ -328,7 +355,7 @@ namespace Graph
             return res.ToString();
         }
         
-        public string print()
+        public string Print()
         {
             StringBuilder res = new StringBuilder();
             if (directed != null)
@@ -354,7 +381,7 @@ namespace Graph
             return res.ToString();
         }
         
-        public IEnumerable getEdge()
+        public IEnumerable GetEdge()
         {
             foreach (Node a in nodes)
             {
