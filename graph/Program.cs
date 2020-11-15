@@ -17,10 +17,9 @@ namespace Graph_main
 
             Graph.Graph g1 = new Graph.Graph(g);
             
-            Console.WriteLine("\n");
             g.CreateGraphVizFile("/home/jconda/RiderProjects/graph/Test data/output.txt");
             
-            UI.mainMenu(g1); 
+            UI.MainMenu(g1); 
 
         }
     }
