@@ -11,9 +11,12 @@ namespace Graph
 {
     public class Graph
     {
-        LinkedList<Node> nodes = new LinkedList<Node>();
+        private LinkedList<Node> nodes = new LinkedList<Node>();
         private bool? directed = null ;
-        
+        private delegate void delVertex(string u, string v, int weigth);
+
+        #region  Constructors
+
         public Graph() { }
 
         public Graph(string where)
@@ -29,7 +32,7 @@ namespace Graph
                         var arrNode = s.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
                         foreach (var node in arrNode)
                         {
-                            addNode(node);
+                            AddNode(node);
                         }
                         if (lines[++i] == "directed")
                         {
@@ -45,7 +48,7 @@ namespace Graph
                             try
                             {
                                 var tmp = lines[++i].Split(',');
-                                addDirectedVertex(tmp[0], tmp[1], int.Parse(tmp[2]));
+                                AddDirectedVertex(tmp[0], tmp[1], int.Parse(tmp[2]));
                             }
                             catch (IndexOutOfRangeException)
                             {
@@ -69,17 +72,20 @@ namespace Graph
             directed = g.directed;
         }
 
+        #endregion
 
-        public void addNode(string label, int data)
+        #region Methods with nodes
+
+        public void AddNode(string label, int data)
         {
             nodes.AddLast(new Node(data,label));
         }
 
-        public void addNode(string label)
+        public void AddNode(string label)
         {
-            addNode(label,0);
+            AddNode(label,0);
         }
-        public void delNode(string u)
+        public void DelNode(string u)
         {
             Node x = null;
             foreach (Node a in nodes)
@@ -95,13 +101,17 @@ namespace Graph
             }
             nodes.Remove(x);
         }
+        
+        #endregion
 
-        public void addNonDirectedVertex(string u, string v)
+        #region Methods with vertex(edges)
+
+        public void AddNonDirectedVertex(string u, string v)
         {
-            addNonDirectedVertex(u, v, 0);
+            AddNonDirectedVertex(u, v, 0);
         }
 
-        public void addNonDirectedVertex(string u, string v,int weigth)
+        public void AddNonDirectedVertex(string u, string v,int weigth)
         {
             Node x = null, y = null;
             foreach (Node a in nodes)
@@ -122,7 +132,7 @@ namespace Graph
             x.neighbors.AddLast(new Vertex(y, weigth));
             y.neighbors.AddLast(new Vertex(x, weigth));
         }
-        private void delNonDirectedVertex(string u, string v,int weigth)
+        private void DelNonDirectedVertex(string u, string v,int weigth)
         {
             Node x = null, y = null;
             foreach (Node a in nodes)
@@ -160,27 +170,12 @@ namespace Graph
             y.neighbors.Remove(vertex1);
         }
 
-        public String neighbors(string u)
+        public void AddDirectedVertex(string u, string v)
         {
-            StringBuilder result = new StringBuilder();
-            foreach (Node a in nodes) {
-                if (a.label.Equals(u)) {
-                    foreach (Vertex b in a.neighbors)
-                    {
-                        result.Append(" " + b.node.label);
-                    }
-                    return result.ToString();
-                }            
-            }            
-            return result.ToString();
+            AddDirectedVertex(u, v, 0);
         }
 
-        public void addDirectedVertex(string u, string v)
-        {
-            addDirectedVertex(u, v, 0);
-        }
-
-        public void addDirectedVertex(string u, string v,int weigth)
+        public void AddDirectedVertex(string u, string v,int weigth)
         {
             Node x = null, y = null;
             foreach (Node a in nodes)
@@ -200,7 +195,7 @@ namespace Graph
             }
             x.neighbors.AddLast(new Vertex(y, weigth));
         }
-        private void delDirectedVertex(string u, string v, int weigth)
+        private void DelDirectedVertex(string u, string v, int weigth)
         {
             Node x = null, y = null;
             foreach (Node a in nodes)
@@ -234,7 +229,27 @@ namespace Graph
             x.neighbors.Remove(vertex);
         }
         
-        private void clearAllMarks()
+        public void DelEdge(string u, string v, int weigth)
+        {
+            if (directed == true)
+            {
+                delVertex edge = new delVertex(DelDirectedVertex);
+                edge(u, v, weigth);
+            }
+            else if (directed == false)
+            {
+                delVertex edge = new delVertex(DelNonDirectedVertex);
+                edge(u, v, weigth);
+            }
+            else
+            {
+                throw new Exception("Не определена напраленность графа!");
+            }
+        }
+        
+        #endregion
+        
+        private void ClearAllMarks()
         {
             foreach (Node a in nodes)
             {
@@ -242,15 +257,33 @@ namespace Graph
     	    }    	 
         }
         
-        private Node getNodeByName(String u){
+        private Node GetNodeByName(String u){
     	    foreach(Node a in nodes){
         		if (a.label.Equals(u)){
     			    return a;
     		    } 
     	    }
     	    return null;
-        }    
+        }
         
+        // returns a List neighbors of a node
+        public LinkedList<string> GetLabelNeighborsNode(string u)
+        {
+            LinkedList<string> reach = new LinkedList<string>();
+            var uNode = GetNodeByName(u);
+            foreach (Vertex a in uNode.neighbors)
+                reach.AddLast(a.node.label);
+            return reach;
+        }
+        
+        public LinkedList<string> GetLabelNodes() 
+        {
+            LinkedList<string> labelNodes = new LinkedList<string>();
+            foreach (Node a in nodes)
+                labelNodes.AddLast(a.label);
+            return labelNodes;
+        }
+        #region View
         public void CreateGraphVizFile(string where)
         {
             StreamWriter writer = new StreamWriter(where, false);
@@ -279,6 +312,20 @@ namespace Graph
                 }
             }
             writer.Close();
+        }
+        public override string ToString()
+        {
+            StringBuilder res = new StringBuilder();
+            foreach (Node a in nodes)
+            {
+                res.Append($"{a.label}: [");
+                foreach (Vertex b in a.neighbors)
+                {
+                    res.Append($"{{{b.node.label}, {b.weight}}}, ");
+                }
+                res.Append("]\n");
+            }
+            return res.ToString();
         }
         
         public string print()
@@ -317,40 +364,7 @@ namespace Graph
                 }
             }
         }
-
-        public override string ToString()
-        {
-            StringBuilder res = new StringBuilder();
-            foreach (Node a in nodes)
-            {
-                res.Append($"{a.label}: [");
-                foreach (Vertex b in a.neighbors)
-                {
-                    res.Append($"{{{b.node.label}, {b.weight}}}, ");
-                }
-                res.Append("]\n");
-            }
-            return res.ToString();
-        }
-
-        private delegate void delVertex(string u, string v, int weigth);
-
-        public void delEdge(string u, string v, int weigth)
-        {
-            if (directed == true)
-            {
-                delVertex edge = new delVertex(delDirectedVertex);
-                edge(u, v, weigth);
-            }
-            else if (directed == false)
-            {
-                delVertex edge = new delVertex(delNonDirectedVertex);
-                edge(u, v, weigth);
-            }
-            else
-            {
-                throw new Exception("Не определена напраленность графа!");
-            }
-        }
+        
+        #endregion
     }
 }
