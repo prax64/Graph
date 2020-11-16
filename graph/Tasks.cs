@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace graph
 {
-    public class Tasks
+    public class Tasks : UI
     {
-        public static void MenuTasks(Graph.Graph g)
+        public void MenuTasks(Graph.Graph g)
         {
             Console.Clear();
             Console.WriteLine("Задание 1. ");
@@ -33,6 +33,7 @@ namespace graph
                     foreach (var a in resStr)
                         Console.Write($"{a}, ");
                     Console.WriteLine();
+                    GoToMenuTasks(g);
                     break;
                 case "2":
                     Console.WriteLine("la\n" +
@@ -44,13 +45,21 @@ namespace graph
                         foreach (var a in g.GetLabelNeighborsNode(u))
                             Console.Write($"{a}, ");
                     }
+                    GoToMenuTasks(g);
                     break;
                 case "3":
+                    Console.WriteLine("lb\n" +
+                                      "19) Построить граф, полученный однократным удалением рёбер, соединяющих" +
+                                      " вершины одинаковой степени.");
+                    g.Task3();
+                    GoToMenuTasks(g);
                     break;
                 case "4":
+                    Console.WriteLine("II\n" +
+                                      "18) Проверить граф на ацикличность.");
+                    GoToMenuTasks(g);
                     break;
                 case "0":
-                    UI.MainMenu(g);
                     break;
                 default:
                     Console.WriteLine("Не верный формат ввода. Введите цифру заново.");
@@ -58,7 +67,7 @@ namespace graph
                     break;
             }
         }
-        private static void GoToMenuTasks(Graph.Graph g)
+        private void GoToMenuTasks(Graph.Graph g)
         {
             Console.WriteLine("\nВведите 1, для перехода в меню c заданиями:");
             string tmp = Console.ReadLine();
