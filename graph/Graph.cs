@@ -387,7 +387,41 @@ namespace Graph
             }    	 
             return aux;
         }
+        
+        
+        #endregion
 
+
+        #region Checking for acyclicity(DFS)
+
+        private bool DFSWalk(Node u)
+        {
+            ClearAllMarks();
+            u.mark = 1;
+            bool cycle = false;
+            foreach(Vertex a in u.neighbors)
+            {
+                if(a.node.mark == 0)
+                {
+                    DFSWalk(a.node); 
+                }
+                else
+                {
+                    cycle = true;
+                }
+            }
+            return cycle;
+        }
+
+        public bool Acyclic()
+        {
+            foreach (var node in nodes)
+            {
+                if (DFSWalk(node))
+                    return false;
+            }
+            return true;
+        }
         #endregion
         
         #region View
