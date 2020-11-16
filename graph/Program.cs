@@ -19,11 +19,14 @@ namespace Graph_main
             
             Graph.Graph g2 = new Graph.Graph("/home/jconda/RiderProjects/graph/Test data/input2");
             
+            Graph.Graph g3 = new Graph.Graph("/home/jconda/RiderProjects/graph/Test data/input3");
+            
             g.CreateGraphVizFile("/home/jconda/RiderProjects/graph/Test data/output.txt");
             
             List<Graph.Graph> graphs = new List<Graph.Graph>();
             graphs.Add(g);
             graphs.Add(g2);
+            graphs.Add(g3);
             
             UI ui = new UI(graphs);
             ui.MainMenu();
