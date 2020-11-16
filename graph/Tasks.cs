@@ -57,6 +57,7 @@ namespace graph
                 case "4":
                     Console.WriteLine("II\n" +
                                       "18) Проверить граф на ацикличность.");
+                    Console.WriteLine($"Ацикличность графа = {g.Acyclic()}");
                     GoToMenuTasks(g);
                     break;
                 case "0":
