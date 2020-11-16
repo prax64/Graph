@@ -1,0 +1,6 @@
+Graph
+a,b,c,d,e,f,g,h
+directed
+a,b,-1
+a,e,2
+b,c,2
