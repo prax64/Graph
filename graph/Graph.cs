@@ -388,15 +388,38 @@ namespace Graph
             return aux;
         }
         
+        public String BFSWalk(String u){
+            ClearAllMarks();
+            String aux;    	 
+            LinkedList<Node> list = new LinkedList<Node>();
+            Node start = GetNodeByName(u);
+            if (start == null ){
+                return "";
+            }
+
+            aux = start.label;
+            start.mark = 1;
+            list.AddLast(start);
+            while(list.Count != 0){
+                Node v = list.First();
+                list.RemoveFirst();
+                foreach(Vertex a in v.neighbors){
+                    if (a.node.mark == 0){
+                        aux = aux+" "+a.node.label;
+                        a.node.mark = 1;
+                        list.AddLast(a.node);
+                    }    			 
+                }
+            }
+            return aux;
+        } 
         
         #endregion
-
 
         #region Checking for acyclicity(DFS)
 
         private bool DFSWalk(Node u)
         {
-            ClearAllMarks();
             u.mark = 1;
             bool cycle = false;
             foreach(Vertex a in u.neighbors)
@@ -417,6 +440,7 @@ namespace Graph
         {
             foreach (var node in nodes)
             {
+                ClearAllMarks();
                 if (DFSWalk(node))
                     return false;
             }
