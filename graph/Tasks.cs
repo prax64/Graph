@@ -17,6 +17,10 @@ namespace graph
 
             Console.WriteLine("Задание 4. ");
             
+            Console.WriteLine("Задание 5. ");
+            
+            Console.WriteLine("Задание 6. ");
+            
             Console.WriteLine("Введите 0, для перехода в основное меню.");
 
             string digit = Console.ReadLine();
@@ -58,6 +62,42 @@ namespace graph
                     Console.WriteLine("II\n" +
                                       "18) Проверить граф на ацикличность.");
                     Console.WriteLine($"Ацикличность графа = {g.Acyclic()}");
+                    GoToMenuTasks(g);
+                    break;
+                case "5":
+                    Console.WriteLine("II\n" +
+                                      "32) Вывести кратчайший (по числу рёбер) цикл орграфа, содержащий вершину u.");
+                    Console.Write("Введите вершину:  ");
+                    u = Console.ReadLine();
+                    Console.WriteLine(g.BFSWalk(u));
+                    GoToMenuTasks(g);
+                    break;
+                case "6":
+                    Console.WriteLine("III\n" +
+                                      "П) Дан взвешенный неориентированный граф из N вершин и M ребер." +
+                                      " Требуется найти в нем каркас минимального веса.");
+                    GoToMenuTasks(g);
+                    break;
+                case "7":
+                    Console.WriteLine("IV а (Дейкстра)\n" +
+                                      "4) Вывести длины кратчайших путей от u до v1 и v2.");
+                    GoToMenuTasks(g);
+                    break;
+                case "8":
+                    Console.WriteLine("IV b (Форд-Беллман, Флойд)\n" +
+                                      "10) Эксцентриситет вершины — максимальное расстояние из всех минимальных " +
+                                      "расстояний от других вершин до данной вершины. Найти радиус графа — " +
+                                      "минимальный из эксцентриситетов его вершин.");
+                    GoToMenuTasks(g);
+                    break;
+                case "9":
+                    Console.WriteLine("IV с (Форд-Беллман, Флойд)\n" +
+                                      "12) Вывести кратчайший путь из вершины u до вершины v.");
+                    GoToMenuTasks(g);
+                    break;
+                case "10":
+                    Console.WriteLine("V Нахождение максимального потока\n" +
+                                      "Решить задачу на нахождение максимального потока любым алгоритмом.");
                     GoToMenuTasks(g);
                     break;
                 case "0":
