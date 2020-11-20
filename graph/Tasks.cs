@@ -74,8 +74,11 @@ namespace graph
                     break;
                 case "6":
                     Console.WriteLine("III\n" +
-                                      "П) Дан взвешенный неориентированный граф из N вершин и M ребер." +
+                                      "Алгоритм Прима) Дан взвешенный неориентированный граф из N вершин и M ребер." +
                                       " Требуется найти в нем каркас минимального веса.");
+                    Console.Write("Введите вершину:  ");
+                    u = Console.ReadLine();
+                    Console.WriteLine(g.Prim(u));
                     GoToMenuTasks(g);
                     break;
                 case "7":
