@@ -361,8 +361,36 @@ namespace Graph
 
         #endregion
 
-        #region Walk
+        #region Walks
 
+        private void InitializePathFinder(Node start) 
+        {
+            foreach (Node a in nodes) 
+            {
+                if (a == start)
+                    a.distanceToMe = 0;
+                else
+                    a.distanceToMe = int.MaxValue;
+                a.Father = null;
+                a.mark = 0;
+            }
+        }
+        
+        private Node Lowest(LinkedList<Node> l) 
+        {
+            int lowest = int.MaxValue;
+            Node lower = null;
+            foreach (Node a in l) 
+            {
+                if (a.distanceToMe < lowest && a.mark == 0)
+                {
+                    lowest = a.distanceToMe;
+                    lower = a;
+                }
+            }
+            return lower;
+        }
+        
         public String DFSWalk(String u)
         {
             ClearAllMarks();
@@ -413,26 +441,47 @@ namespace Graph
             }
             return aux;
         }
-        #endregion
 
-        #region Prim's algorithm
+        #region Dijkstra
 
-        private Node Lowest(LinkedList<Node> l) 
-        {
-            int lowest = int.MaxValue;
-            Node lower = null;
-            foreach (Node a in l) 
+        private void relaxDijkstra(Node u, Node v, int weight) {
+            if (v.distanceToMe > u.distanceToMe + weight) {
+                v.distanceToMe = u.distanceToMe + weight;
+                v.Father = u;
+            }
+        }
+
+        public String Dijkstra(String u, String v) {
+            InitializePathFinder(GetNodeByName(u));
+            Node x = null;
+            while (true)  
             {
-                if (a.distanceToMe < lowest && a.mark == 0)
+                x = Lowest(nodes);
+                if (x == null) {
+                    break;
+                }
+                x.mark = 1;
+                foreach (Vertex a in x.neighbors)
                 {
-                    lowest = a.distanceToMe;
-                    lower = a;
+                    relaxDijkstra(x, a.node, a.weight);
                 }
             }
-            return lower;
+            Node Finish = GetNodeByName(v);
+            String res = "";
+            int totalWeight = Finish.distanceToMe;
+            while (Finish != null) {
+                res += " -> "+Finish.label;
+                Finish = Finish.Father;            
+            }
+            return res+" Total Weight: "+totalWeight;
         }
+
+        #endregion
         
-        private void Relax(Node u, Node v, int weight) 
+        
+        #region Prim's algorithm
+        
+        private void RelaxPrim(Node u, Node v, int weight) 
         {
             if (v.distanceToMe > u.distanceToMe + weight) 
             {
@@ -441,18 +490,6 @@ namespace Graph
             }
         }
         
-        private void InitializePathFinder(Node start) 
-        {
-            foreach (Node a in nodes) 
-            {
-                if (a == start)
-                    a.distanceToMe = 0;
-                else
-                    a.distanceToMe = int.MaxValue;
-                a.Father = null;
-                a.mark = 0;
-            }
-        }
 
         public String Prim(String u) {
             InitializePathFinder(GetNodeByName(u));
@@ -470,13 +507,16 @@ namespace Graph
                 x.mark = 1;
                 foreach (Vertex a in x.neighbors)
                 {
-                    Relax(x, a.node, a.weight);
+                    RelaxPrim(x, a.node, a.weight);
                 }
             }
             return res+$" Total Distance: {totalWeight}" ;
         }
 
         #endregion
+        
+        #endregion
+        
         
         #region Checking for acyclicity(DFS)
 

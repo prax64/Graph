@@ -10,17 +10,14 @@ namespace graph
         {
             Console.Clear();
             Console.WriteLine("Задание 1. ");
-
             Console.WriteLine("Задание 2. ");
-
             Console.WriteLine("Задание 3. ");
-
             Console.WriteLine("Задание 4. ");
-            
             Console.WriteLine("Задание 5. ");
-            
             Console.WriteLine("Задание 6. ");
-            
+            Console.WriteLine("Задание 7. ");
+            Console.WriteLine("Задание 8. ");
+            Console.WriteLine("Задание 9. ");
             Console.WriteLine("Введите 0, для перехода в основное меню.");
 
             string digit = Console.ReadLine();
@@ -73,8 +70,8 @@ namespace graph
                     GoToMenuTasks(g);
                     break;
                 case "6":
-                    Console.WriteLine("III\n" +
-                                      "Алгоритм Прима) Дан взвешенный неориентированный граф из N вершин и M ребер." +
+                    Console.WriteLine("III Алгоритм Прима\n" +
+                                      "Дан взвешенный неориентированный граф из N вершин и M ребер." +
                                       " Требуется найти в нем каркас минимального веса.");
                     Console.Write("Введите вершину:  ");
                     u = Console.ReadLine();
@@ -84,6 +81,18 @@ namespace graph
                 case "7":
                     Console.WriteLine("IV а (Дейкстра)\n" +
                                       "4) Вывести длины кратчайших путей от u до v1 и v2.");
+                    Console.Write("Введите вершину u:  ");
+                    u = Console.ReadLine();
+                    Console.Write("Введите вершину v1:  ");
+                    string v1 = Console.ReadLine();
+                    Console.Write("Введите вершину v2:  ");
+                    string v2 = Console.ReadLine();
+                    
+                    Console.WriteLine( $"Кратчайший путь от u до v1:\n" +
+                                       $"{g.Dijkstra(u,v1)}");
+                    Console.WriteLine( $"Кратчайший путь от u до v2:\n" +
+                                       $"{g.Dijkstra(u,v2)}");
+                    
                     GoToMenuTasks(g);
                     break;
                 case "8":
