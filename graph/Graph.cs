@@ -412,10 +412,72 @@ namespace Graph
                 }
             }
             return aux;
-        } 
-        
+        }
         #endregion
 
+        #region Prim's algorithm
+
+        private Node Lowest(LinkedList<Node> l) 
+        {
+            int lowest = int.MaxValue;
+            Node lower = null;
+            foreach (Node a in l) 
+            {
+                if (a.distanceToMe < lowest && a.mark == 0)
+                {
+                    lowest = a.distanceToMe;
+                    lower = a;
+                }
+            }
+            return lower;
+        }
+        
+        private void Relax(Node u, Node v, int weight) 
+        {
+            if (v.distanceToMe > u.distanceToMe + weight) 
+            {
+                v.distanceToMe =  weight;
+                v.Father = u;
+            }
+        }
+        
+        private void InitializePathFinder(Node start) 
+        {
+            foreach (Node a in nodes) 
+            {
+                if (a == start)
+                    a.distanceToMe = 0;
+                else
+                    a.distanceToMe = int.MaxValue;
+                a.Father = null;
+                a.mark = 0;
+            }
+        }
+
+        public String Prim(String u) {
+            InitializePathFinder(GetNodeByName(u));
+            Node x = null;
+            string res = "";
+            int totalWeight = 0;
+            while (true)  
+            {
+                x = Lowest(nodes);
+                if (x == null) {
+                    break;
+                }
+                res += $" -> {x.label}";
+                totalWeight += x.distanceToMe;
+                x.mark = 1;
+                foreach (Vertex a in x.neighbors)
+                {
+                    Relax(x, a.node, a.weight);
+                }
+            }
+            return res+$" Total Distance: {totalWeight}" ;
+        }
+
+        #endregion
+        
         #region Checking for acyclicity(DFS)
 
         private bool DFSWalk(Node u)
@@ -435,6 +497,7 @@ namespace Graph
             }
             return cycle;
         }
+        
 
         public bool Acyclic()
         {
