@@ -1,14 +1,17 @@
 Graph
 a,b,c,d,e,f,g,h
 directed
-a,b,-1
-a,a,10
+a,b,6
 a,c,4
 b,a,7
 b,c,3
 b,e,3
 b,d,2
 d,b,1
-e,d,-3
+e,d,11
 d,c,5
+e,f,10
+f,g,1
+f,h,11
+
 
