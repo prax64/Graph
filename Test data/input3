@@ -1,6 +1,7 @@
 Graph
-a,b,c,d,e,f,g,h
+a,b,c
 directed
-a,b,-1
-a,e,2
+a,b,1
+a,c,2
 b,c,2
+c,a,10
