@@ -338,6 +338,62 @@ namespace Graph
             return labelNodes;
         }
 
+        //костыль
+        private Dictionary<string,Dictionary<string,int>> ToMatrix()
+        {
+            Dictionary<string,Dictionary<string,int>>  matr = new Dictionary<string, Dictionary<string, int>>();
+            ClearAllMarks();
+            string nodeLabel_i = "";
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                Dictionary<string,int> tmp = new Dictionary<string, int>();
+
+                foreach (var node in nodes)
+                {
+                    tmp.Add(node.label,int.MaxValue);
+                }
+
+                
+                foreach (var node in nodes)
+                {
+                    if (node.mark != 1)
+                    {
+                        nodeLabel_i = node.label;
+                        node.mark = 1;
+                        break;
+                    }
+                }
+                matr.Add(nodeLabel_i,tmp);
+            }
+            
+            foreach (var node in nodes)
+            {
+                foreach (var vertex in node.neighbors)
+                {
+                    matr[node.label][vertex.node.label] = vertex.weight;
+                }
+            }
+            
+            return matr;
+        }
+
+        public int SearchRadius()
+        {
+            int radius = Int32.MaxValue;
+            var d = FloydWarshall();
+            for(int i = 0; i < d.Count; i++)
+            {
+                int eccentricity = Int32.MinValue;
+                for (int j = 0; j < d.Count; j++)
+                {
+                    eccentricity = Math.Max(eccentricity, d[i][j]);
+                }
+                radius = Math.Min(radius, eccentricity);
+            }
+
+            return radius;
+        }
+
         #region Methods for tasks
 
         public void Task3()
@@ -390,7 +446,56 @@ namespace Graph
             }
             return lower;
         }
+
+        #region Floyd Warshall
+
+        private List<List<int>> FloydWarshall()
+        {
+            var d = ToMatrix();
+            //костыли -_-
+            List<List<int>> res = new List<List<int>>();
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                List<int> tmp = new List<int>();
+
+                foreach (var node in nodes)
+                {
+                    tmp.Add(0);
+                }
+                res.Add(tmp);
+            }
+
+            for (int k = 0; k < nodes.Count; k++) 
+            {
+                for (int i = 0; i < nodes.Count; i++) 
+                {
+                    for (int j = 0; j < nodes.Count; j++)
+                    {
+                        if (d.ElementAt(i).Value.ElementAt(k).Value < int.MaxValue &&
+                            d.ElementAt(k).Value.ElementAt(j).Value < int.MaxValue)
+                        {
+                            var с = d.ElementAt(i).Value.ElementAt(j).Value;
+                            var с1 = d.ElementAt(i).Value.ElementAt(k).Value;
+                            var c2 = d.ElementAt(k).Value.ElementAt(j).Value;
+                            res[i][j] = Math.Min(d.ElementAt(i).Value.ElementAt(j).Value,
+                                d.ElementAt(i).Value.ElementAt(k).Value +
+                                d.ElementAt(k).Value.ElementAt(j).Value);
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                res[i][i] = 0;
+            }
+            return res;
+        }
+
+        #endregion
         
+        #region DFSWalk
+
         public String DFSWalk(String u)
         {
             ClearAllMarks();
@@ -415,7 +520,11 @@ namespace Graph
             }    	 
             return aux;
         }
-        
+
+        #endregion
+
+        #region BFSWalk
+
         public String BFSWalk(String u){
             ClearAllMarks();
             String aux;    	 
@@ -441,6 +550,8 @@ namespace Graph
             }
             return aux;
         }
+
+        #endregion
 
         #region Dijkstra
 
