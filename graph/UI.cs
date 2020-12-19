@@ -98,6 +98,7 @@ namespace graph
                     }
                     catch (ArgumentOutOfRangeException)
                     {
+                        Console.WriteLine("ArgumentOutOfRangeException");
                         goto default;
                     }
                     MainMenu();

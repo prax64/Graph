@@ -23,6 +23,10 @@ namespace Graph_main
             
             Graph.Graph g4 = new Graph.Graph("/home/jconda/RiderProjects/graph/Test data/input4");
             
+            Graph.Graph g5 = new Graph.Graph("/home/jconda/RiderProjects/graph/Test data/input5");
+            
+            Graph.Graph g6 = new Graph.Graph("/home/jconda/RiderProjects/graph/Test data/input6");
+            
             g.CreateGraphVizFile("/home/jconda/RiderProjects/graph/Test data/output.txt");
             
             List<Graph.Graph> graphs = new List<Graph.Graph>();
@@ -30,6 +34,8 @@ namespace Graph_main
             graphs.Add(g2);
             graphs.Add(g3);
             graphs.Add(g4);
+            graphs.Add(g5);
+            graphs.Add(g6);
             
             UI ui = new UI(graphs);
             ui.MainMenu();

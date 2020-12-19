@@ -15,6 +15,8 @@ namespace Graph
         private bool? directed = null ;
         public bool? Directed => directed;
         private delegate void delVertex(string u, string v);
+        private List<List<int>> helper = new List<List<int>>();
+        private List<List<int>> distance = new List<List<int>>();
 
         #region  Constructors
 
@@ -43,7 +45,13 @@ namespace Graph
                                 try
                                 {
                                     var tmp = lines[++i].Split(',');
-                                    AddDirectedVertex(tmp[0], tmp[1], int.Parse(tmp[2]));
+                                    if (tmp.Length <= 3)
+                                        AddDirectedVertex(tmp[0], tmp[1], int.Parse(tmp[2]));
+                                    else
+                                    {
+                                        AddDirectedVertexFlow(tmp[0], tmp[1], int.Parse(tmp[2]),
+                                            int.Parse(tmp[3]),int.Parse(tmp[4]));
+                                    }
                                 }
                                 catch (IndexOutOfRangeException)
                                 {
@@ -59,7 +67,9 @@ namespace Graph
                                 try
                                 {
                                     var tmp = lines[++i].Split(',');
-                                    AddNonDirectedVertex(tmp[0], tmp[1], int.Parse(tmp[2]));
+                                    if(tmp.Length<=3)
+                                        AddNonDirectedVertex(tmp[0], tmp[1], int.Parse(tmp[2]));
+
                                 }
                                 catch (IndexOutOfRangeException)
                                 {
@@ -158,6 +168,35 @@ namespace Graph
             x.neighbors.AddLast(new Vertex(y, weigth));
             y.neighbors.AddLast(new Vertex(x, weigth));
         }
+        
+        public void AddNonDirectedVertexFlow(string u, string v,int weigth, int flow, int flowCapacity)
+        {
+            Node x = null, y = null;
+            foreach (Node a in nodes)
+            {
+                if (a.label.Equals(u))
+                {
+                    x = a;
+                }
+                if (a.label.Equals(v))
+                {
+                    y = a;
+                }
+            }
+            
+            if (x == null || y == null || !CheckingAdding(x, y))
+            {
+                return;
+            }
+            
+            if (u == v)
+            {
+                x.neighbors.AddLast(new Vertex(y, weigth));
+                return;
+            }
+            x.neighbors.AddLast(new Vertex(y, weigth, flow, flowCapacity));
+            y.neighbors.AddLast(new Vertex(x, weigth, flow, flowCapacity));
+        }
         private void DelNonDirectedVertex(string u, string v)
         {
             Node x = null, y = null;
@@ -247,6 +286,26 @@ namespace Graph
                 return;
             }
             x.neighbors.AddLast(new Vertex(y, weigth));
+        }
+        public void AddDirectedVertexFlow(string u, string v,int weigth, int flow, int flowCapacity)
+        {
+            Node x = null, y = null;
+            foreach (Node a in nodes)
+            {
+                if (a.label.Equals(u))
+                {
+                    x = a;
+                }
+                if (a.label.Equals(v))
+                {
+                    y = a;
+                }
+            }
+            if (x == null || y == null || !CheckingAdding(x, y))
+            {
+                return;
+            }
+            x.neighbors.AddLast(new Vertex(y, weigth, flow, flowCapacity));
         }
         private void DelDirectedVertex(string u, string v)
         {
@@ -338,7 +397,7 @@ namespace Graph
             return labelNodes;
         }
 
-        //костыль
+        //Horrible piece of shit
         private Dictionary<string,Dictionary<string,int>> ToMatrix()
         {
             Dictionary<string,Dictionary<string,int>>  matr = new Dictionary<string, Dictionary<string, int>>();
@@ -376,11 +435,39 @@ namespace Graph
             
             return matr;
         }
+        class EdgeForBellmanFord { 
+            public int v, u, weight; 
+            public EdgeForBellmanFord(int v, int u, int weight)
+            {
+                this.v = v;
+                this.u = u;
+                this.weight = weight;
+            } 
+        }; 
+        private List<EdgeForBellmanFord> ToListForBellmanFord()
+        {
+            List<EdgeForBellmanFord>  array = new List<EdgeForBellmanFord>();
+            ClearAllMarks();
+            int i = 0, j = 0;
+            foreach (var node in nodes)
+            {
+                j = 0;
+                foreach (var vertex in node.neighbors)
+                {
+                    array.Add(new EdgeForBellmanFord(i,j,vertex.weight));
+                    j++;
+                }
+
+                i++;
+            }
+            return array;
+        }
 
         public int SearchRadius()
         {
+            FloydWarshall();
             int radius = Int32.MaxValue;
-            var d = FloydWarshall();
+            var d = distance;
             for(int i = 0; i < d.Count; i++)
             {
                 int eccentricity = Int32.MinValue;
@@ -390,8 +477,64 @@ namespace Graph
                 }
                 radius = Math.Min(radius, eccentricity);
             }
-
+            distance.Clear();
             return radius;
+        }
+        
+        
+        public string ShortestPath_FloydWarshall(string u, string v)
+        {
+            FloydWarshall();
+            int num_u = 0, num_v = 0;
+            int k = 0;
+            bool flag1 = false, flag2 = false;
+            foreach (var node in nodes)
+            {
+                if (node.label == u)
+                {
+                    num_u = k;
+                    flag1 = true;
+                }
+                if (node.label == v)
+                {
+                    num_v = k;
+                    flag2 = true;
+                }
+                k++;
+            }
+            if (!flag1 || !flag2)
+                return "vertex do not exist";
+            string path = "";
+            GetPath(num_u, num_v, ref path);
+            distance.Clear();
+            helper.Clear();
+            return path;
+        }
+        
+        private void GetPath(int u, int v, ref string path)
+        {
+            List<int> list = new List<int>();
+            int ver = helper[u][v];
+            list.Add(v);
+            while (ver != -1)
+            {
+                list.Add(ver);
+                ver = helper[u][ver];
+            }
+            list.Add(u);
+            {
+                list.Reverse();
+                foreach (var el in list)
+                {
+                    int i = 0;
+                    foreach (var node in nodes)
+                    {
+                        if (i == el)
+                            path += " -> " + node.label;
+                        i++;
+                    }
+                }
+            }
         }
 
         #region Methods for tasks
@@ -440,31 +583,33 @@ namespace Graph
             {
                 if (a.distanceToMe < lowest && a.mark == 0)
                 {
-                    lowest = a.distanceToMe;
+                    //lowest = a.distanceToMe;
                     lower = a;
                 }
             }
             return lower;
         }
-
-        #region Floyd Warshall
-
-        private List<List<int>> FloydWarshall()
+        
+        private void FloydWarshall()
         {
             var d = ToMatrix();
-            //костыли -_-
-            List<List<int>> res = new List<List<int>>();
+            //Kludge -_-
+            distance.Clear();
+            helper.Clear();
             for (int i = 0; i < nodes.Count; i++)
             {
-                List<int> tmp = new List<int>();
+                List<int> tmp1 = new List<int>();
+                List<int> tmp2 = new List<int>();
 
-                foreach (var node in nodes)
+                for (int j = 0; j < nodes.Count; j++)
                 {
-                    tmp.Add(0);
+                    tmp1.Add(d.ElementAt(i).Value.ElementAt(j).Value);
+                    tmp2.Add(-1);
                 }
-                res.Add(tmp);
+                distance.Add(tmp1);
+                helper.Add(tmp2);
             }
-
+            //-_-
             for (int k = 0; k < nodes.Count; k++) 
             {
                 for (int i = 0; i < nodes.Count; i++) 
@@ -472,14 +617,14 @@ namespace Graph
                     for (int j = 0; j < nodes.Count; j++)
                     {
                         if (d.ElementAt(i).Value.ElementAt(k).Value < int.MaxValue &&
-                            d.ElementAt(k).Value.ElementAt(j).Value < int.MaxValue)
+                            d.ElementAt(k).Value.ElementAt(j).Value < int.MaxValue &&
+                            d.ElementAt(i).Value.ElementAt(k).Value +
+                            d.ElementAt(k).Value.ElementAt(j).Value < 
+                            d.ElementAt(i).Value.ElementAt(j).Value
+                            )
                         {
-                            var с = d.ElementAt(i).Value.ElementAt(j).Value;
-                            var с1 = d.ElementAt(i).Value.ElementAt(k).Value;
-                            var c2 = d.ElementAt(k).Value.ElementAt(j).Value;
-                            res[i][j] = Math.Min(d.ElementAt(i).Value.ElementAt(j).Value,
-                                d.ElementAt(i).Value.ElementAt(k).Value +
-                                d.ElementAt(k).Value.ElementAt(j).Value);
+                            distance[i][j] = distance[i][k] + distance[k][j];
+                            helper[i][j] = k;
                         }
                     }
                 }
@@ -487,13 +632,82 @@ namespace Graph
 
             for (int i = 0; i < nodes.Count; i++)
             {
-                res[i][i] = 0;
+                distance[i][i] = 0;
             }
-            return res;
         }
 
-        #endregion
-        
+        public string BellmanFord(string u, string v)
+        {
+            var e = ToListForBellmanFord();
+            List<int> d = new List<int>();
+            List<int> p = new List<int>();
+            int c1 = 0;
+            int c2 = 0;
+            foreach (var node in nodes)
+            {
+                d.Add(Int32.MaxValue);
+            }
+            d.Add(Int32.MaxValue);
+            foreach (var node in nodes)
+            {
+                if (node.label != u )
+                    c1++;
+                else
+                    break;
+            }
+            foreach (var node in nodes)
+            {
+                if (node.label != v )
+                    c2++;
+                else
+                    break;
+            }
+            for (int i = 0; i < nodes.Count+1; i++)
+            {
+                p.Add(-1);
+            }
+
+            d[c1] = 0;
+            for (;;)
+            {
+                bool any = false;
+                for (int j = 0; j < e.Count; ++j)
+                    if (d[e[j].v] < Int32.MaxValue)
+                    {
+                        if (d[e[j].u] > d[e[j].v] + e[j].weight)
+                        {
+                            d[e[j].u] = d[e[j].v] + e[j].weight;
+                            p[e[j].u] = e[j].v;
+                            any = true;
+                        }
+                    }
+
+                if (!any) 
+                    break;
+            }
+            if (d[c2] == Int32.MaxValue)
+                 return string.Format($"No path from {u} to {v}");
+
+            string pathStr = "";
+            List<int> path = new List<int>();
+            for (int cur=c2; cur!=-1; cur=p[cur])
+                path.Add(cur);
+
+            foreach (var el in path)
+            {
+                int i = 0;
+                foreach (var node in nodes)
+                {
+                    if (i == el)
+                        pathStr = " -> " + node.label + pathStr;
+                    i++;
+                }
+            }
+
+            return pathStr;
+
+        }
+
         #region DFSWalk
 
         public String DFSWalk(String u)
@@ -522,9 +736,7 @@ namespace Graph
         }
 
         #endregion
-
-        #region BFSWalk
-
+        
         public String BFSWalk(String u){
             ClearAllMarks();
             String aux;    	 
@@ -550,8 +762,7 @@ namespace Graph
             }
             return aux;
         }
-
-        #endregion
+        
 
         #region Dijkstra
 
@@ -578,55 +789,243 @@ namespace Graph
                 }
             }
             Node Finish = GetNodeByName(v);
-            String res = "";
+            String distance = "";
             int totalWeight = Finish.distanceToMe;
             while (Finish != null) {
-                res += " -> "+Finish.label;
+                distance = " -> "+Finish.label + distance;
                 Finish = Finish.Father;            
             }
-            return res+" Total Weight: "+totalWeight;
+            return distance+" Total Weight: "+totalWeight;
         }
 
         #endregion
         
-        
-        #region Prim's algorithm
-        
-        private void RelaxPrim(Node u, Node v, int weight) 
+        public String Prim(string u) 
         {
-            if (v.distanceToMe > u.distanceToMe + weight) 
+            ClearAllMarks();
+            SortedSet<string> nodeLabel = new SortedSet<string>();
+            Node node_u = GetNodeByName(u);
+            node_u.mark = 1;
+            string distance = "";
+            int totalWeight = 0;
+            List<Node> nodesArr = new List<Node>();
+            List<Node> nodesArr_fa = new List<Node>();
+            nodesArr.Add(node_u);
+            int min;
+            Node tmp = null;
+            Node tmp_fa = null;
+            while (nodes.Count != nodeLabel.Count)
             {
-                v.distanceToMe =  weight;
-                v.Father = u;
+                min = Int32.MaxValue;
+                foreach (var node in nodesArr)
+                {
+                    foreach (var vertex in node.neighbors)
+                    {
+                        if (vertex.weight < min && vertex.node.mark != 1)
+                        {
+                            min = vertex.weight;
+                            tmp = vertex.node;
+                            tmp_fa = node;
+                        }
+                    }
+                }
+                tmp.mark = 1;
+                nodesArr_fa.Add(tmp_fa);
+                nodesArr_fa.Add(tmp);
+                nodesArr.Add(tmp);
+                totalWeight += min;
+                nodeLabel.Add(tmp_fa.label);
+                nodeLabel.Add(tmp.label);
             }
+            foreach (var node in nodesArr_fa)
+            {
+                distance += node.label + " -> ";
+            }
+            return distance+$" Total Distance: {totalWeight}" ;
         }
         
-
-        public String Prim(String u) {
-            InitializePathFinder(GetNodeByName(u));
-            Node x = null;
-            string res = "";
+        public String Kruskal() 
+        {
+            ClearAllMarks();
+            SortedSet<string> nodeLabel = new SortedSet<string>();
+            string distance = "";
             int totalWeight = 0;
-            while (true)  
+            List<Node> nodesArr = new List<Node>();
+            int min;
+            int color = 0;
+            Node tmp = null;
+            Node tmp_fa = null;
+            // while (nodeLabel.Count != nodes.Count )
+            // {
+            //     min = Int32.MaxValue;
+            //     foreach (var node in nodes)
+            //     {
+            //         foreach (var vertex in node.neighbors)
+            //         {
+            //             if (vertex.weight < min && vertex.node.mark != 1)
+            //             {
+            //                 min = vertex.weight;
+            //                 tmp = vertex.node;
+            //                 tmp_fa = node;
+            //             }
+            //         }
+            //     }
+            //     tmp.mark = 1;
+            //     tmp_fa.mark = 1;
+            //     nodesArr.Add(tmp_fa);
+            //     nodesArr.Add(tmp);
+            //     totalWeight += min;
+            //     nodeLabel.Add(tmp.label);
+            //     nodeLabel.Add(tmp_fa.label);
+            // }
+
+            for (int i = 0; i < nodes.Count - 1; i++)
             {
-                x = Lowest(nodes);
-                if (x == null) {
+                min = Int32.MaxValue;
+                foreach (var node in nodes)
+                {
+                    foreach (var vertex in node.neighbors)
+                    {
+                        if (vertex.weight < min && vertex.node.mark != 1 )
+                        {
+                            min = vertex.weight;
+                            tmp = vertex.node;
+                            tmp_fa = node;
+                        }
+                    }
+                }
+                tmp.mark = 1;
+                //tmp_fa.mark = 1;
+                nodesArr.Add(tmp_fa);
+                nodesArr.Add(tmp);
+                totalWeight += min;
+                nodeLabel.Add(tmp.label);
+                nodeLabel.Add(tmp_fa.label);
+            }
+            
+            foreach (var node in nodesArr)
+            {
+                distance += node.label + " -> ";
+            }
+            return distance+$" Total Distance: {totalWeight}" ;
+        }
+        
+        public String Boruvka() 
+        {
+            ClearAllMarks();
+            SortedSet<string> nodeLabel = new SortedSet<string>();
+            string distance = "";
+            int totalWeight = 0;
+            List<Node> nodesArr = new List<Node>();
+            int min;
+            Node tmp = null;
+            Node tmp_fa = null;
+            while (nodeLabel.Count != nodes.Count)
+            {
+                min = Int32.MaxValue;
+                foreach (var node in nodes)
+                {
+                    foreach (var vertex in node.neighbors)
+                    {
+                        if (vertex.weight < min && vertex.node.mark != 1)
+                        {
+                            min = vertex.weight;
+                            tmp = vertex.node;
+                            tmp_fa = node;
+                        }
+                    }
+                }
+                tmp.mark = 1;
+                tmp_fa.mark = 1;
+                nodesArr.Add(tmp_fa);
+                nodesArr.Add(tmp);
+                totalWeight += min;
+                nodeLabel.Add(tmp.label);
+                nodeLabel.Add(tmp_fa.label);
+            }
+            foreach (var node in nodesArr)
+            {
+                distance += node.label + " -> ";
+            }
+            return distance+$" Total Distance: {totalWeight}" ;
+        }
+        #endregion
+        
+        
+        private Vertex getEdge(Node u, Node v)
+        {
+            foreach (var vertex in u.neighbors)
+            {
+                if (vertex.node.label == v.label)
+                    return vertex;
+            }
+            // foreach (var vertex in v.neighbors)
+            // {
+            //     if (vertex.node.label == u.label)
+            //         return vertex;
+            // }
+            return null;
+        }
+        private bool DFSWalk(Node u, Node v, ref LinkedList<Vertex> path
+        ,ref LinkedList<string> visited)
+        {
+            if (u == v)
+                return true;
+            foreach (var vis in visited)
+            {
+                if (vis == u.label)
+                    return false;
+            }
+            //bool fl = true;
+            foreach(Vertex a in u.neighbors)
+            {
+                if(a.residualFlow() <= 0)
+                    continue;
+                visited.AddFirst(u.label);
+                if (DFSWalk(a.node, v, ref path, ref visited))
+                {
+                    a.node.Father = u;//////////////////////////
+                    path.AddFirst(a);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public int FordFulkerson(string u, string v)
+        {
+            Node nodeU = GetNodeByName(u);
+            Node nodeV = GetNodeByName(v);
+            int maxFlow = 0;
+            while (true)
+            {
+
+                LinkedList<Vertex> path = new LinkedList<Vertex>();
+                LinkedList<string> visited = new LinkedList<string>();
+                
+                if (!DFSWalk(nodeU, nodeV, ref path, ref visited))
+                {
                     break;
                 }
-                res += $" -> {x.label}";
-                totalWeight += x.distanceToMe;
-                x.mark = 1;
-                foreach (Vertex a in x.neighbors)
+
+                int minFlow = Int32.MaxValue;
+                foreach (var p in path)
                 {
-                    RelaxPrim(x, a.node, a.weight);
+                    if (p.residualFlow() < minFlow)
+                        minFlow = p.residualFlow();
+                }
+                maxFlow += minFlow;
+                foreach (var p in path)
+                {
+                    p.flow += minFlow;
+                    Vertex antiEdge = getEdge(p.node, p.node.Father);
+                    if (antiEdge != null)
+                        antiEdge.flow -= minFlow;
                 }
             }
-            return res+$" Total Distance: {totalWeight}" ;
-        }
 
-        #endregion
-        
-        #endregion
+            return maxFlow;
+        }
         
         
         #region Checking for acyclicity(DFS)
@@ -648,7 +1047,7 @@ namespace Graph
             }
             return cycle;
         }
-        
+
 
         public bool Acyclic()
         {
@@ -694,28 +1093,28 @@ namespace Graph
         }
         public override string ToString()
         {
-            StringBuilder res = new StringBuilder();
+            StringBuilder distance = new StringBuilder();
             foreach (Node a in nodes)
             {
-                res.Append($"{a.label}: [");
+                distance.Append($"{a.label}: [");
                 foreach (Vertex b in a.neighbors)
                 {
-                    res.Append($"{{{b.node.label}, {b.weight}}}, ");
+                    distance.Append($"{{{b.node.label}, {b.weight}}}, ");
                 }
-                res.Append("]\n");
+                distance.Append("]\n");
             }
-            return res.ToString();
+            return distance.ToString();
         }
         
         public string Print()
         {
-            StringBuilder res = new StringBuilder();
+            StringBuilder distance = new StringBuilder();
             if (directed != null)
             {
                 if (directed == true)
-                    res.Append("Graph = directed\n");
+                    distance.Append("Graph = directed\n");
                 else
-                    res.Append("Graph = nondirected\n");
+                    distance.Append("Graph = nondirected\n");
             }
             else
             {
@@ -723,14 +1122,14 @@ namespace Graph
             }
             foreach (Node a in nodes)
             {
-                res.Append($"{a.label}: [");
+                distance.Append($"{a.label}: [");
                 foreach (Vertex b in a.neighbors)
                 {
-                    res.Append($"{{{b.node.label}, {b.weight}}}, ");
+                    distance.Append($"{{{b.node.label}, {b.weight}}}, ");
                 }
-                res.Append("]\n");
+                distance.Append("]\n");
             }
-            return res.ToString();
+            return distance.ToString();
         }
         
         public IEnumerable GetEdge()

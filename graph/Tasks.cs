@@ -18,6 +18,7 @@ namespace graph
             Console.WriteLine("Задание 7. ");
             Console.WriteLine("Задание 8. ");
             Console.WriteLine("Задание 9. ");
+            Console.WriteLine("Задание 10. ");
             Console.WriteLine("Введите 0, для перехода в основное меню.");
 
             string digit = Console.ReadLine();
@@ -73,9 +74,11 @@ namespace graph
                     Console.WriteLine("III Алгоритм Прима\n" +
                                       "Дан взвешенный неориентированный граф из N вершин и M ребер." +
                                       " Требуется найти в нем каркас минимального веса.");
-                    Console.Write("Введите вершину:  ");
+                    Console.Write("Введите вершину u:  ");
                     u = Console.ReadLine();
                     Console.WriteLine(g.Prim(u));
+                    Console.WriteLine();
+                    Console.WriteLine(g.Kruskal());
                     GoToMenuTasks(g);
                     break;
                 case "7":
@@ -89,7 +92,7 @@ namespace graph
                     string v2 = Console.ReadLine();
                     
                     Console.WriteLine( $"Кратчайший путь от u до v1:\n" +
-                                       $"{g.Dijkstra(u,v1)}");
+                                       $"{g.ShortestPath_FloydWarshall (u,v1)}");
                     Console.WriteLine( $"Кратчайший путь от u до v2:\n" +
                                        $"{g.Dijkstra(u,v2)}");
                     
@@ -106,11 +109,24 @@ namespace graph
                 case "9":
                     Console.WriteLine("IV с (Форд-Беллман, Флойд)\n" +
                                       "12) Вывести кратчайший путь из вершины u до вершины v.");
+                    Console.WriteLine("V Нахождение максимального потока\n" +
+                                      "Решить задачу на нахождение максимального потока любым алгоритмом.");
+                    Console.Write("Введите вершину u:  ");
+                    u = Console.ReadLine();
+                    Console.Write("Введите вершину v:  ");
+                    string v = Console.ReadLine();
+                    //Console.WriteLine($"Кратчайший путь от u до v: {g.ShortestPath_FloydWarshall(u, v)}");
+                    Console.WriteLine($"Кратчайший путь от u до v: {g.BellmanFord(u, v)}");
                     GoToMenuTasks(g);
                     break;
                 case "10":
                     Console.WriteLine("V Нахождение максимального потока\n" +
                                       "Решить задачу на нахождение максимального потока любым алгоритмом.");
+                    Console.Write("Введите вершину u:  ");
+                    u = Console.ReadLine();
+                    Console.Write("Введите вершину v:  ");
+                    v = Console.ReadLine();
+                    Console.WriteLine($"Максимальный поток = {g.FordFulkerson(u, v)}");
                     GoToMenuTasks(g);
                     break;
                 case "0":

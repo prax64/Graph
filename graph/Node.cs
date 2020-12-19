@@ -11,6 +11,7 @@ namespace Graph
         public int data = 0;
         public short mark = 0;
         public string label;
+        public int color = 0;
         public int distanceToMe = 0;
         public Node Father = null;
         public LinkedList<Vertex> neighbors = new LinkedList<Vertex>();
